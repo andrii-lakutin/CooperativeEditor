@@ -5,6 +5,9 @@ import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
 
+// Shared folder
+import { SharedModule } from './shared/shared.module';
+
 @NgModule({
   declarations: [
     AppComponent
@@ -12,7 +15,8 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpModule,
+    SharedModule
   ],
   providers: [],
   bootstrap: [AppComponent]
