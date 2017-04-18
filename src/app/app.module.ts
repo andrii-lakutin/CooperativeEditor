@@ -11,20 +11,22 @@ import { AppComponent } from './app.component';
 // Shared folder
 import { SharedModule } from './shared/shared.module';
 import { LoginPageComponent } from './login/login-page/login-page.component';
+import { RoomComponent } from './room/room.component';
 
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginPageComponent
+    LoginPageComponent,
+    RoomComponent
   ],
   imports: [
-    RouterModule.forRoot(appRoutes),
     BrowserModule,
     FormsModule,
     HttpModule,
-    SharedModule
+    SharedModule,
+    RouterModule.forRoot(appRoutes)
   ],
   providers: [],
   bootstrap: [AppComponent]

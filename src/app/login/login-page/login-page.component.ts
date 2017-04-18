@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
+import { RouterService } from '../../shared';
+
 @Component({
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
@@ -7,13 +9,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LoginPageComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    private routerService: RouterService
+  ) {}
 
   ngOnInit() {
   }
 
   onSubmit(nick, room) {
-    console.log(nick, room);
+    this.routerService.navigateToRoom(room);
   }
 
 }
