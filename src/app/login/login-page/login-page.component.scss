@@ -1,0 +1,24 @@
+.loginForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+input {
+    &:not(:first-child) {
+        margin-top: 50px;
+    }
+    &:not(:last-child) {
+        border-bottom: 1px solid gray;
+    }
+    width: 300px;    
+    padding: 10px;
+}
+
+
+.joinButton {
+    width: 150px;
+    color: white;
+    background-color: rgba(#558B2F, 0.8);
+}

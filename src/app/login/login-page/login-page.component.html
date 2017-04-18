@@ -1,3 +1,20 @@
-<p>
-  login-page works!
-</p>
+<div>
+  <form 
+      class="loginForm" 
+      (submit)="onSubmit(nick.value, room.value)">
+    <input 
+        #nick
+        class="nickname" 
+        type="text" 
+        placeholder="Nickname"/>
+    <input 
+        #room
+        class="room" 
+        type="text" 
+        placeholder="Room"/>
+    <input 
+        class="joinButton" 
+        type="submit"
+        value="Join!">
+  </form>
+</div>
