@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, forwardRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
@@ -26,7 +26,7 @@ import { RoomComponent } from './room/room.component';
     FormsModule,
     HttpModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes)
+    forwardRef(() => RouterModule.forRoot(appRoutes))
   ],
   providers: [],
   bootstrap: [AppComponent]

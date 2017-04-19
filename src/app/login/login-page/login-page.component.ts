@@ -10,13 +10,17 @@ import { RouterService } from '../../shared';
 export class LoginPageComponent implements OnInit {
 
   constructor(
-    private routerService: RouterService
+    public routerService: RouterService
   ) {}
 
   ngOnInit() {
   }
 
-  onSubmit(nick, room) {
+  onSubmit(nick: string, room: string) {
+    if (!room || !nick) {
+      return;
+    }
+
     this.routerService.navigateToRoom(room);
   }
 

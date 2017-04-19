@@ -5,7 +5,7 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 export class RouterService {
 
   constructor(
-    private route: ActivatedRoute,
+    private activatedRoute: ActivatedRoute,
     private router: Router
   ) {}
 
