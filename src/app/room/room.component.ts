@@ -12,4 +12,8 @@ export class RoomComponent implements OnInit {
   ngOnInit() {
   }
 
+  sendMessage(msg) {
+    console.log(msg);
+  }
+
 }

@@ -17,3 +17,8 @@ $search-placeholder: #757575;
 		text-indent: -300px;
 	}
 }
+
+@mixin prototype() {
+	background: rgba(#558B2F, 0.3);
+    box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.75);
+}

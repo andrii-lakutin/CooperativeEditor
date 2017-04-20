@@ -1,3 +1,18 @@
-<p>
-  room works!
-</p>
+<div class="roomsContainer">
+  <div class="editor"></div>
+  <div class="chat">
+    <div class="profile"></div>
+    <div class="messages"></div>
+    <input 
+        #message
+        class="message" 
+        type="text" 
+        placeholder="Type message here..."
+        (keyup.enter)="
+          sendMessage(message.value);
+          message.value = '';
+        "/>
+  </div>
+  <div class="output"></div>
+</div>
+
