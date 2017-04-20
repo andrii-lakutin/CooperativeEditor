@@ -23,7 +23,7 @@ describe('SocketService', () => {
       expect(socketService.connect).toBeDefined();
     });
 
-    it('should be defined', () => {
+    it('should create socket', () => {
       socketService.connect();
       expect(socketService.socket).toBeTruthy();
     });
