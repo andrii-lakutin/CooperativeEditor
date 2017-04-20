@@ -12,6 +12,8 @@ import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { LoginPageComponent } from './login/login-page/login-page.component';
 import { RoomComponent } from './room/room.component';
+//Ace editor
+import { AceEditorModule } from 'ng2-ace-editor';
 
 @NgModule({
   declarations: [
@@ -24,6 +26,7 @@ import { RoomComponent } from './room/room.component';
     FormsModule,
     HttpModule,
     SharedModule,
+    AceEditorModule,
     RouterModule.forRoot(appRoutes)
   ],
   providers: [],
