@@ -1,0 +1,22 @@
+<div>
+  <form 
+      class="loginForm" 
+      (submit)="onSubmit(nick.value, room.value)">
+    <input 
+        #nick
+        class="nickname" 
+        type="text" 
+        placeholder="Nickname"
+        maxlength="15"/>
+    <input 
+        #room
+        class="room" 
+        type="text" 
+        placeholder="Room"
+        maxlength="15"/>
+    <input 
+        class="joinButton" 
+        type="submit"
+        value="Join!">
+  </form>
+</div>
