@@ -10,7 +10,6 @@ describe('LoginPageComponent', () => {
   let routerServiceMock, routerService;
 
   beforeEach(async(() => {
-
     routerServiceMock = {
       navigateToRoom: () => {}
     };
@@ -31,9 +30,6 @@ describe('LoginPageComponent', () => {
     component = fixture.componentInstance;
     routerService = fixture.debugElement.injector.get(RouterService);
     fixture.detectChanges();
-
-    var privateTest = spyOn(component, 'routerService').and.callThrough();
-    spyOn(privateTest, 'navigateToRoom');
   });
 
   it('should be defined', () => {
@@ -41,6 +37,11 @@ describe('LoginPageComponent', () => {
   });
 
   describe('#onSubmit', () => {
+
+    beforeEach(() => {
+      const privateTest = spyOn(component, 'routerService').and.callThrough();
+      spyOn(privateTest, 'navigateToRoom');
+    });
 
     it('should be defined', () => {
       expect(component.onSubmit).toBeDefined();

@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { SocketService } from './services/socket/socket.service';
-import { RouterService } from './services/router/router.service';
+import { SocketService, RouterService } from './';
 
 @NgModule({
     providers: [

@@ -5,8 +5,8 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 export class RouterService {
 
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private router: Router
+    public router: Router,
+    public activatedRoute: ActivatedRoute
   ) {}
 
   navigateToRoom (room) {

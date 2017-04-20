@@ -13,8 +13,6 @@ import { SharedModule } from './shared/shared.module';
 import { LoginPageComponent } from './login/login-page/login-page.component';
 import { RoomComponent } from './room/room.component';
 
-
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,7 +24,7 @@ import { RoomComponent } from './room/room.component';
     FormsModule,
     HttpModule,
     SharedModule,
-    forwardRef(() => RouterModule.forRoot(appRoutes))
+    RouterModule.forRoot(appRoutes)
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -3,27 +3,23 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { RouterService } from './router.service';
 
-class activatedRouteStub {};
-class routerStub {};
-
 describe('RouterService', () => {
 
   let routerService: RouterService;
   let activatedRoute: ActivatedRoute;
   let router: Router;
-  // beforeEach(() => {
-  //   const activatedRoute = <ActivatedRoute>{};
-  //   const router = <Router>{};
-  //   routerService = new RouterService(activatedRoute, router);
-  //   spyOn(routerService.router, 'navigate');
-  // });
+
+  const activatedRouteStub = {};
+  const routerStub = {
+    navigate: () => {}
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
         providers: [
-          routerService,
-          { provide: activatedRoute, useClass: activatedRouteStub },
-          { provide: router, useClass: routerStub }
+          RouterService,
+          { provide: ActivatedRoute, useValue: activatedRouteStub },
+          { provide: Router, useValue: routerStub }
         ]
     });
 
@@ -36,17 +32,21 @@ describe('RouterService', () => {
     expect(routerService).toBeDefined();
   });
 
-  // describe('#navigateToRoom', () => {
+  describe('#navigateToRoom', () => {
 
-  //   it('should be defined', () => {
-  //     expect(routerService.navigateToRoom).toBeDefined();
-  //   });
+    beforeEach(() => {
+      spyOn(routerService.router, 'navigate');
+    });
 
-  //   it('should navigate to room that comes into it', () => {
-  //     routerService.navigateToRoom('testRoom');
-  //     expect(routerService.router.navigate).toHaveBeenCalledWith(['/rooms', 'testRoom']);
-  //   });
+    it('should be defined', () => {
+      expect(routerService.navigateToRoom).toBeDefined();
+    });
 
-  // });
+    it('should navigate to room that comes into it', () => {
+      routerService.navigateToRoom('testRoom');
+      expect(routerService.router.navigate).toHaveBeenCalledWith(['/rooms', 'testRoom']);
+    });
+
+  });
 
 });
