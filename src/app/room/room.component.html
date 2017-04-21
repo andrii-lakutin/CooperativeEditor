@@ -7,7 +7,9 @@
       (textChanged)="onEditorChanges($event)">
   </ace-editor>
   <div class="chat">
-    <div class="profile"></div>
+    <div class="profile">
+      {{userNickname}}
+    </div>
     <div class="messages"></div>
     <input 
         #message

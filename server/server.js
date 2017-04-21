@@ -14,8 +14,13 @@ const root = __dirname + '/../dist';
 app.use(express.static(root));
 app.use(fallback('index.html', {root}));
 
-io.on('connection', function(socket){
-  console.log('a user connected');
+io.on('connection', (socket) => {
+  console.log('New connection detected!');
+  socket.on('Request for joining room', (info) => {
+    socket.join(info.room);
+    io.to(info.room).emit('Someone has been joined to the room', info);
+    console.log(`${info.nick} joined to ${info.room}`);
+  });
 });
 
 http.listen(3000, () => {

@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 
-import { SocketService, RouterService } from './';
+import { BEService, RouterService } from './';
 
 @NgModule({
     providers: [
-        SocketService,
+        BEService,
         RouterService
     ]
 })

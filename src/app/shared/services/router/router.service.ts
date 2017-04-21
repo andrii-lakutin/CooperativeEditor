@@ -12,4 +12,8 @@ export class RouterService {
   navigateToRoom (room) {
      this.router.navigate(['/rooms', room]);
   }
+
+  navigateToLogin() {
+    this.router.navigate(['/']);
+  }
 }
