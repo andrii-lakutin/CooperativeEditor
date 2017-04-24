@@ -30,14 +30,14 @@ export class BEService {
     });
   }
 
-  updateFile(file, room) {
-    this.socket.emit('File update', {file, room});
-  }
-
   listenForFileUpdates() {
     this.socket.on('Someone update file', (file) => {
       this.file$.next(file);
     });
+  }
+
+  updateFile(file, room) {
+    this.socket.emit('File update', {file, room});
   }
 
   joinRoom(info) {
@@ -59,6 +59,10 @@ export class BEService {
 
   fileSave (file, room) {
     this.socket.emit('File save', {file, room});
+  }
+
+  getEditorValue(room) {
+    this.socket.emit('Request for editor value', room);
   }
 
 }

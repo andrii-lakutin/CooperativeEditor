@@ -22,7 +22,10 @@ io.on('connection', (socket) => {
 
   socket.on('File update', (info) => {
     socket.broadcast.to(info.room).emit('Someone update file', info.file);
-    // onFileUpdate(info);
+  });
+
+  socket.on('Request for editor value', (room) => {
+    getEditorValue(room);
   });
 
   socket.on('File save', (info) => {
@@ -144,8 +147,20 @@ function onFileUpdate(info) {
       console.log('Mongo update error');
     } else {
       if (room) {
-        console.log(`There is file update in the room ${room.name}`);
+        console.log(`Editor in ${room.name} saved.`);
       }
     }
+  });
+}
+
+function getEditorValue(roomName) {
+  Room.findOne({name: roomName}).exec((err,room) => {
+      if (err) {
+        console.log('Mongo find error');
+      } else {
+        if (room) {
+          io.to(roomName).emit('Someone update file', room.editorValue);
+        }
+      }
   });
 }

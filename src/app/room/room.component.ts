@@ -41,6 +41,8 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       this.beService.fileSave(this.editor.getEditor().getValue(), this.userRoom);
       console.log('File saved');
     }, 5000);
+
+    this.beService.getEditorValue(this.userRoom);
   }
 
   ngAfterViewInit() {
