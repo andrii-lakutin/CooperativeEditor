@@ -126,10 +126,6 @@ function pushToRoom(info, socket) {
   .exec((err,room) => {
     if (err) {
       console.log('Mongo update error');
-    } else {
-      if (room) {
-        console.log(`Socket ${socket.id} leave ${room.name}`);
-      }
     }
   });
 }
