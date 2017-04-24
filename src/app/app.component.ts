@@ -11,7 +11,7 @@ export class AppComponent implements OnInit {
 
   title: string;
 
-  constructor(private beService: BEService) {
+  constructor(public beService: BEService) {
      this.title = 'COOPERATIVE EDITOR';
   }
 

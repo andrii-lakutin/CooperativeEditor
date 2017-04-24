@@ -1,31 +1,31 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { SocketService } from './socket.service';
+import { BEService } from './be.service';
 
-describe('SocketService', () => {
+describe('BEService', () => {
 
-  let socketService: SocketService;
+  let beService: BEService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SocketService]
+      providers: [BEService]
     });
-    socketService = TestBed.get(SocketService);
+    beService = TestBed.get(BEService);
   });
 
   it('should be defined', () => {
-    expect(socketService).toBeDefined();
+    expect(beService).toBeDefined();
   });
 
   describe('#connect', () => {
 
     it('should be defined', () => {
-      expect(socketService.connect).toBeDefined();
+      expect(beService.connect).toBeDefined();
     });
 
     it('should create socket', () => {
-      socketService.connect();
-      expect(socketService.socket).toBeTruthy();
+      beService.connect();
+      expect(beService.socket).toBeTruthy();
     });
 
   });
