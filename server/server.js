@@ -18,8 +18,12 @@ io.on('connection', (socket) => {
   console.log('New connection detected!');
   socket.on('Request for joining room', (info) => {
     socket.join(info.room);
-    io.to(info.room).emit('Someone has been joined to the room', info);
+    socket.broadcast.to(info.room).emit('Someone has been joined to the room', info);
     console.log(`${info.nick} joined to ${info.room}`);
+  });
+
+  socket.on('File update', (file) => {
+    socket.broadcast.to(file.room).emit('Someone update file', file.file);
   });
 });
 

@@ -18,8 +18,9 @@ export class LoginPageComponent implements OnInit {
   ngOnInit() {
   }
 
-  joinRoom(room) {
-    this.beService.joinRoom(room);
+  joinRoom(info) {
+    this.beService.logIn(info);
+    this.beService.joinRoom(info);
   }
 
   onSubmit(nick: string, room: string) {
@@ -27,7 +28,6 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    this.beService.onLogIn({nick, room});
     this.joinRoom({nick, room});  // TODO: Add some access rules.
     this.routerService.navigateToRoom(room);
   }
