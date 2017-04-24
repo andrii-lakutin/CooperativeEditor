@@ -57,4 +57,8 @@ export class BEService {
     this.socket.emit('User leave room');
   }
 
+  fileSave (file, room) {
+    this.socket.emit('File save', {file, room});
+  }
+
 }

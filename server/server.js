@@ -20,8 +20,13 @@ io.on('connection', (socket) => {
     joinRoom(info, socket);
   });
 
-  socket.on('File update', (file) => {
-    socket.broadcast.to(file.room).emit('Someone update file', file.file);
+  socket.on('File update', (info) => {
+    socket.broadcast.to(info.room).emit('Someone update file', info.file);
+    // onFileUpdate(info);
+  });
+
+  socket.on('File save', (info) => {
+    onFileUpdate(info);
   });
 
   socket.on('User leave room', () => {
@@ -38,7 +43,6 @@ http.listen(3000, () => {
 });
 
 function joinRoom(info, socket) {
-  console.log('INFO NAME', info.room);
   Room.find({name: info.room}).exec((err,data) => {
       if (err) {
         console.log('Mongo find error');
@@ -122,6 +126,25 @@ function pushToRoom(info, socket) {
     } else {
       if (room) {
         console.log(`Socket ${socket.id} leave ${room.name}`);
+      }
+    }
+  });
+}
+
+function onFileUpdate(info) {
+  Room.findOneAndUpdate(
+    {
+      name: info.room
+    },
+    { 
+      editorValue: info.file
+    })
+  .exec((err,room) => {
+    if (err) {
+      console.log('Mongo update error');
+    } else {
+      if (room) {
+        console.log(`There is file update in the room ${room.name}`);
       }
     }
   });

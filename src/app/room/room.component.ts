@@ -13,6 +13,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   text: string;
   userNickname: string;
   userRoom: string;
+  saver: any;
 
   constructor(
     public routerService: RouterService,
@@ -35,6 +36,11 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
     this.beService.file$.subscribe(file => {
       this.text = file;
     });
+
+    this.saver = setInterval(() => {
+      this.beService.fileSave(this.editor.getEditor().getValue(), this.userRoom);
+      console.log('File saved');
+    }, 5000);
   }
 
   ngAfterViewInit() {
@@ -54,6 +60,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.beService.leaveRoom();
+    clearInterval(this.saver);
   }
 
 }
