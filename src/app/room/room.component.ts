@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 
 import { RouterService, BEService, HelperService } from '../shared';
 
@@ -7,7 +7,7 @@ import { RouterService, BEService, HelperService } from '../shared';
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.scss']
 })
-export class RoomComponent implements OnInit, AfterViewInit {
+export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('editor') editor;
   @ViewChild('output') output;
   text: string;
@@ -50,6 +50,10 @@ export class RoomComponent implements OnInit, AfterViewInit {
 
   onEditorChanges(newValue) {
     this.beService.updateFile(this.editor.getEditor().getValue(), this.userRoom);
+  }
+
+  ngOnDestroy() {
+    this.beService.leaveRoom();
   }
 
 }

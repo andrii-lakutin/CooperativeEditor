@@ -53,4 +53,8 @@ export class BEService {
     return this.user$.getValue().nick;
   }
 
+  leaveRoom() {
+    this.socket.emit('User leave room');
+  }
+
 }

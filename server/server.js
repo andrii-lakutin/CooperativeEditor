@@ -23,6 +23,14 @@ io.on('connection', (socket) => {
   socket.on('File update', (file) => {
     socket.broadcast.to(file.room).emit('Someone update file', file.file);
   });
+
+  socket.on('User leave room', () => {
+    leaveRoom(socket.id);
+  });
+
+  socket.on('disconnect', () => {
+    leaveRoom(socket.id);
+  });
 });
 
 http.listen(3000, () => {
@@ -30,12 +38,13 @@ http.listen(3000, () => {
 });
 
 function joinRoom(info, socket) {
-  Room.find({name: info.name}).exec((err,data) => {
-    console.log('Inside');
+  console.log('INFO NAME', info.room);
+  Room.find({name: info.room}).exec((err,data) => {
       if (err) {
         console.log('Mongo find error');
       } else {
         if (data.length) {
+          pushToRoom(info, socket);
           joinSocket(info, socket);
         } else {
           createRoom(info, socket);
@@ -45,10 +54,12 @@ function joinRoom(info, socket) {
 };
 
 function createRoom(info, socket) {
-  // TODO: Handle logout
   let newRoom = new Room({
     name: info.room,
-    users: [info.nick], 
+    users: [{
+      nick: info.nick,
+      socketId: socket.id
+    }], 
     editorValue: ''
   });
 
@@ -62,6 +73,56 @@ function createRoom(info, socket) {
 function joinSocket(info, socket) {
   socket.join(info.room);
   socket.broadcast.to(info.room).emit('Someone has been joined to the room', info);
-  console.log(`${info.nick} joined to ${info.room}`);
+  console.log(`Socket ${socket.id} joined as ${info.nick} to ${info.room}`);
 };
 
+function leaveRoom(id, room) {
+  Room.findOneAndUpdate(
+    {
+      users: {
+        $elemMatch: {
+          socketId: id
+        }
+      }
+    },
+    { 
+        $pull: { 
+          users: { 
+            socketId: id
+          } 
+        }
+    })
+  .exec((err,room) => {
+    if (err) {
+      console.log('Mongo update error');
+    } else {
+      if (room) {
+        console.log(`Socket ${id} leave ${room.name}`);
+      }
+    }
+  });
+}
+
+function pushToRoom(info, socket) {
+  Room.findOneAndUpdate(
+    {
+      name: info.room
+    },
+    { 
+        $push: { 
+          users: { 
+            nick: info.nick,
+            socketId: socket.id
+          } 
+        }
+    })
+  .exec((err,room) => {
+    if (err) {
+      console.log('Mongo update error');
+    } else {
+      if (room) {
+        console.log(`Socket ${socket.id} leave ${room.name}`);
+      }
+    }
+  });
+}
