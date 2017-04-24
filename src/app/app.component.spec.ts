@@ -5,7 +5,7 @@ import { AppComponent } from './app.component';
 
 import { BEService } from './shared';
 
-fdescribe('AppComponent', () => {
+describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
 
