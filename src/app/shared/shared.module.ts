@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 
-import { BEService, RouterService } from './';
+import { BEService, RouterService, HelperService } from './';
 
 @NgModule({
     providers: [
         BEService,
-        RouterService
+        RouterService,
+        HelperService
     ]
 })
 export class SharedModule {}
