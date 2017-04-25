@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef } from '@angular/core';
 
-import { RouterService, BEService, HelperService } from '../shared';
+import { RouterService, BEService } from '../shared';
 
 @Component({
   selector: 'app-room',
@@ -17,8 +17,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     public routerService: RouterService,
-    public beService: BEService,
-    public helperService: HelperService
+    public beService: BEService
   ) {
     this.userNickname = '';
     this.userRoom = '';
@@ -52,11 +51,10 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   sendMessage(msg) {
-    // TODO: Investigate optimization!
-    // this.helperService.findDiff(this.editor.getEditor().getValue(), this.editor.getEditor().getValue()+ '12121212');
+    console.log(msg);
   }
 
-  onEditorChanges(newValue) {
+  onEditorChanges() {
     this.beService.updateFile(this.editor.getEditor().getValue(), this.userRoom);
   }
 

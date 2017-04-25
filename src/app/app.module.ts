@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, forwardRef } from '@angular/core';
+import { NgModule, forwardRef, NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
@@ -12,7 +12,7 @@ import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { LoginPageComponent } from './login/login-page/login-page.component';
 import { RoomComponent } from './room/room.component';
-//Ace editor
+// Ace editor
 import { AceEditorModule } from 'ng2-ace-editor';
 
 @NgModule({
@@ -30,6 +30,7 @@ import { AceEditorModule } from 'ng2-ace-editor';
     RouterModule.forRoot(appRoutes)
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [ NO_ERRORS_SCHEMA ]
 })
 export class AppModule { }
