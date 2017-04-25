@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { SocketService } from './shared';
+import { BEService } from './shared';
 
 @Component({
   selector: 'app-root',
@@ -11,11 +11,11 @@ export class AppComponent implements OnInit {
 
   title: string;
 
-  constructor(private socketService: SocketService) {
+  constructor(public beService: BEService) {
      this.title = 'COOPERATIVE EDITOR';
   }
 
   ngOnInit() {
-    this.socketService.connect();
+    this.beService.connect();
   }
 }

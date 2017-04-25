@@ -12,13 +12,12 @@
     align-content: flex-start;
 
     .editor {
-        @include prototype();
         height: 70%;
         flex: 1 0 75%;
     }
 
     .chat {
-        @include prototype();
+        // @include prototype();
         height: 70%;
         flex: 1 0 25%;
         display: flex;
@@ -26,6 +25,12 @@
         
         .profile {
             flex: 1 0 10%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #272822;
+            box-shadow: inset 0px 0px 15px 0px rgba(0,0,0,0.75);
+            color: white;
         }
 
         .messages {
@@ -41,7 +46,6 @@
     }
 
     .output {
-        @include prototype();
         width: 100%;
         height: 30%;
     }

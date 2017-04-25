@@ -1,18 +1,32 @@
 <div class="roomsContainer">
-  <div class="editor"></div>
+  <ace-editor
+      #editor
+      class="editor"
+      [(text)]="text"
+      [mode]="'javascript'" 
+      (keyup)="onEditorChanges($event)">
+  </ace-editor>
   <div class="chat">
-    <div class="profile"></div>
+    <div class="profile">
+      {{userNickname}}
+    </div>
     <div class="messages"></div>
     <input 
         #message
         class="message" 
-        type="text" 
+        type="text"
         placeholder="Type message here..."
         (keyup.enter)="
           sendMessage(message.value);
           message.value = '';
         "/>
   </div>
-  <div class="output"></div>
+  <ace-editor
+    #output
+    [mode]="'javascript'"
+    [readOnly]="true"
+    class="output"
+    [(text)]="text">
+  </ace-editor>
 </div>
 

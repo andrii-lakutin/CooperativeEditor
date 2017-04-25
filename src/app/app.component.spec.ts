@@ -3,16 +3,16 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { AppComponent } from './app.component';
 
-import { SocketService } from './shared';
+import { BEService } from './shared';
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
 
-  let socketServiceMock, socketService;
+  let beServiceMock, beService;
 
   beforeEach(async(() => {
-    socketServiceMock = {
+    beServiceMock = {
         connect: () => {}
     };
 
@@ -22,7 +22,7 @@ describe('AppComponent', () => {
         AppComponent
       ],
       providers: [
-        {provide: SocketService, useValue: socketServiceMock }
+        {provide: BEService, useValue: beServiceMock }
       ]
     }).compileComponents();
   }));
@@ -30,11 +30,23 @@ describe('AppComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
-    socketService = fixture.debugElement.injector.get(SocketService);
+    beService = fixture.debugElement.injector.get(BEService);
     fixture.detectChanges();
   });
 
   it('should create the app', async(() => {
     expect(component).toBeTruthy();
   }));
+
+  describe('~initialization', () => {
+    it('should set title', (() => {
+      expect(component.title).toEqual('COOPERATIVE EDITOR');
+    }));
+
+    it('should call BEService connect function', (() => {
+      spyOn(component.beService, 'connect');
+      component.ngOnInit();
+      expect(component.beService.connect).toHaveBeenCalledWith();
+    }));
+  });
 });

@@ -49,4 +49,21 @@ describe('RouterService', () => {
 
   });
 
+  describe('#navigateToLogin', () => {
+
+    beforeEach(() => {
+      spyOn(routerService.router, 'navigate');
+    });
+
+    it('should be defined', () => {
+      expect(routerService.navigateToLogin).toBeDefined();
+    });
+
+    it('should navigate to room that comes into it', () => {
+      routerService.navigateToLogin();
+      expect(routerService.router.navigate).toHaveBeenCalledWith(['/']);
+    });
+
+  });
+
 });
