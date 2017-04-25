@@ -6,7 +6,7 @@ import { RouterService, BEService } from '../shared';
 
 import { Observable, BehaviorSubject } from 'rxjs/Rx';
 
-fdescribe('RoomComponent', () => {
+describe('RoomComponent', () => {
   let component: RoomComponent;
   let fixture: ComponentFixture<RoomComponent>;
 
