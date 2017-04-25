@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { RouterService } from './router.service';
 
-fdescribe('RouterService', () => {
+describe('RouterService', () => {
 
   let routerService: RouterService;
   let activatedRoute: ActivatedRoute;
