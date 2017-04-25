@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { RouterService } from './router.service';
 
-describe('RouterService', () => {
+fdescribe('RouterService', () => {
 
   let routerService: RouterService;
   let activatedRoute: ActivatedRoute;
@@ -45,6 +45,23 @@ describe('RouterService', () => {
     it('should navigate to room that comes into it', () => {
       routerService.navigateToRoom('testRoom');
       expect(routerService.router.navigate).toHaveBeenCalledWith(['/rooms', 'testRoom']);
+    });
+
+  });
+
+  describe('#navigateToLogin', () => {
+
+    beforeEach(() => {
+      spyOn(routerService.router, 'navigate');
+    });
+
+    it('should be defined', () => {
+      expect(routerService.navigateToLogin).toBeDefined();
+    });
+
+    it('should navigate to room that comes into it', () => {
+      routerService.navigateToLogin();
+      expect(routerService.router.navigate).toHaveBeenCalledWith(['/']);
     });
 
   });
