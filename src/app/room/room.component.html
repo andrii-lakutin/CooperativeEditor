@@ -9,9 +9,7 @@
     <div class="profile">
       {{userNickname}}
     </div>
-    <div (click)="runScript()">
-      RUN
-    </div>
+    
     <div class="messages"></div>
     <input 
         #message
@@ -22,6 +20,11 @@
           sendMessage(message.value);
           message.value = '';
         "/>
+  </div>
+  <div
+      class="outputHeader"
+      (click)="runScript()">
+      RUN
   </div>
   <ace-editor
     #output
