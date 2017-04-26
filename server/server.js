@@ -15,9 +15,13 @@ app.use(express.static(root));
 app.use(fallback('index.html', {root}));
 
 io.on('connection', (socket) => {
-  console.log('New connection detected!');
+  console.log('New connection detected!'); 
   socket.on('Request for joining room', (info) => {
     joinRoom(info, socket);
+  });
+
+  socket.on('Request for running script', (script, room) => {
+    runScript(script, room);
   });
 
   socket.on('File update', (info) => {
@@ -44,6 +48,14 @@ io.on('connection', (socket) => {
 http.listen(3000, () => {
   console.log('App listening on port 3000!');
 });
+
+function runScript(script, room) {
+  let exec = require('child_process').exec;
+  let childProcess = exec(`babel-node -e "${script}"`, function(error, stdout, stderr){
+    io.to(room).emit('Script run finished', stdout, stderr);
+    childProcess.kill();
+  });
+}
 
 function joinRoom(info, socket) {
   Room.find({name: info.room}).exec((err,data) => {

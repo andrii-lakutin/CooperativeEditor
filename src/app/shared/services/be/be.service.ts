@@ -9,6 +9,8 @@ export class BEService {
   socket: any;
   user$: BehaviorSubject<any>;
   file$: BehaviorSubject<any>;
+  output$: BehaviorSubject<any>;
+  outputError$: BehaviorSubject<any>;
 
   constructor() {
     this.user$ = new BehaviorSubject({
@@ -16,12 +18,15 @@ export class BEService {
       room: null
     });
     this.file$ = new BehaviorSubject('');
+    this.output$ = new BehaviorSubject('');
+    this.outputError$ = new BehaviorSubject('');
   }
 
   connect() {
     this.socket = io(':3000');
     this.listenForNewcomers();
     this.listenForFileUpdates();
+    this.listenForOutput();
   }
 
   listenForNewcomers () {
@@ -33,6 +38,12 @@ export class BEService {
   listenForFileUpdates() {
     this.socket.on('Someone update file', (file) => {
       this.file$.next(file);
+    });
+  }
+
+  listenForOutput() {
+    this.socket.on('Script run finished', (output, error) => {
+      error ? this.outputError$.next(error) : this.output$.next(output);
     });
   }
 
@@ -63,6 +74,10 @@ export class BEService {
 
   getEditorValue(room) {
     this.socket.emit('Request for editor value', room);
+  }
+
+  runScript(script, room) {
+    this.socket.emit('Request for running script', script, room);
   }
 
 }

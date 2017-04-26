@@ -2,7 +2,6 @@
   <ace-editor
       #editor
       class="editor"
-      [(text)]="text"
       [mode]="'javascript'" 
       (keyup)="onEditorChanges($event)">
   </ace-editor>
@@ -10,6 +9,7 @@
     <div class="profile">
       {{userNickname}}
     </div>
+    
     <div class="messages"></div>
     <input 
         #message
@@ -21,12 +21,14 @@
           message.value = '';
         "/>
   </div>
+  <div
+      class="outputHeader"
+      (click)="runScript()">
+      RUN
+  </div>
   <ace-editor
     #output
-    [mode]="'javascript'"
     [readOnly]="true"
-    class="output"
-    [(text)]="text">
+    class="output">
   </ace-editor>
 </div>
-

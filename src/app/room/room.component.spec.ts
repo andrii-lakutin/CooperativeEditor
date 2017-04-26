@@ -23,14 +23,23 @@ describe('RoomComponent', () => {
       getEditorValue: () => {},
       updateFile: () => {},
       leaveRoom: () => {},
+      runScript: () => {},
       user$: new BehaviorSubject({nick: '', room: ''}),
       file$: new BehaviorSubject(''),
+      output$: new BehaviorSubject(''),
+      outputError$: new BehaviorSubject(''),
       changeUserSubject: function (param) {
         this.user$.next(param);
       },
       changeFileSubject: function (param) {
         this.file$.next(param);
-      }
+      },
+      changeOutputSubject: function (param) {
+        this.output$.next(param);
+      },
+      changeOutputErrorSubject: function (param) {
+        this.outputError$.next(param);
+      },
     };
 
     TestBed.configureTestingModule({
@@ -51,7 +60,11 @@ describe('RoomComponent', () => {
       getEditor: () => {
         return {
           $blockScrolling: Infinity,
-          getValue: () => 'editorValue'
+          commands: {
+            addCommand: (a) => { a.exec(); }
+          },
+          getValue: () => 'editorValue',
+          setValue: (newValue, params) => { return {newValue, params}; }
         };
       }
     };
@@ -59,7 +72,8 @@ describe('RoomComponent', () => {
       getEditor: () => {
         return {
           $blockScrolling: Infinity,
-          getValue: () => 'outputValue'
+          getValue: () => 'outputValue',
+          setValue: (newValue, params) => { return {newValue, params}; }
         };
       }
     };
@@ -79,14 +93,13 @@ describe('RoomComponent', () => {
 
   describe('#ngOnInit', () => {
 
-    let fileSaveSpy;
-
     beforeEach(() => {
       const beServiceObj = spyOn(component, 'beService').and.callThrough();
       const routerServiceObj = spyOn(component, 'routerService').and.callThrough();
       spyOn(component.editor.getEditor(), 'getValue');
+      spyOn(component.editor.getEditor(), 'setValue');
       spyOn(routerServiceObj, 'navigateToLogin');
-      fileSaveSpy = spyOn(beServiceObj, 'fileSave');
+      spyOn(beServiceObj, 'fileSave');
 
       beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
       beService.changeFileSubject('someText');
@@ -117,14 +130,24 @@ describe('RoomComponent', () => {
 
     it('should set text value when new data comes from file$ observable', () => {
       component.ngOnInit();
-      expect(component.text).toEqual('someText');
+      expect(component.editor.getEditor().setValue('newValue', 1)).toEqual({newValue: 'newValue', params: 1});
+    });
+
+    it('should set text value when new data comes from output$ observable', () => {
+      component.ngOnInit();
+      expect(component.output.getEditor().setValue('newValue', 1)).toEqual({newValue: 'newValue', params: 1});
+    });
+
+    it('should set text value when new data comes from outputError$ observable', () => {
+      component.ngOnInit();
+      expect(component.output.getEditor().setValue('newError', -1)).toEqual({newValue: 'newError', params: -1});
     });
 
     it('should set text value when new data comes from file$ observable', () => {
+      const fileSaveSpy = spyOn(component, 'saveFile');
       component.ngOnInit();
       jasmine.clock().tick(5001);
-      expect(component.editor.getEditor().getValue()).toEqual('editorValue');
-      expect(component.beService.fileSave).toHaveBeenCalledWith('editorValue', 'someRoom');
+      expect(component.saveFile).toHaveBeenCalledWith();
       jasmine.clock().tick(5001);
       expect(fileSaveSpy.calls.count()).toEqual(2);
     });
@@ -135,6 +158,12 @@ describe('RoomComponent', () => {
 
     it('should be defined', () => {
       expect(component.ngAfterViewInit).toBeDefined();
+    });
+
+    it('should init custom commands', () => {
+      spyOn(component, 'initCustomCommands');
+      component.ngAfterViewInit();
+      expect(component.initCustomCommands).toHaveBeenCalledWith();
     });
 
     it('should set $blockScrolling to Infinity to block console pollution from library', () => {
@@ -157,6 +186,64 @@ describe('RoomComponent', () => {
 
   });
 
+  describe('#initCustomCommands', () => {
+
+    beforeEach(() => {
+      spyOn(component, 'saveFile');
+      spyOn(component, 'runScript');
+    });
+
+    it('should be defined', () => {
+      expect(component.initCustomCommands).toBeDefined();
+    });
+
+    it('should set output value to "" if no editor value', () => {
+      component.editor = {
+        getEditor: () => {
+          return {
+            $blockScrolling: Infinity,
+            commands: {
+              addCommand: (a) => { a.exec(); }
+            },
+            getValue: () => '',
+            setValue: (newValue, params) => { return {newValue, params}; }
+          };
+        }
+      };
+      component.initCustomCommands();
+      expect(component.output.getEditor().setValue('')).toEqual({newValue: '', params: undefined});
+      expect(component.saveFile).toHaveBeenCalledWith();
+      expect(component.runScript).toHaveBeenCalledWith();
+    });
+
+    it('should add ctrl+s combination', () => {
+      component.initCustomCommands();
+      expect(component.saveFile).toHaveBeenCalledWith();
+      expect(component.runScript).toHaveBeenCalledWith();
+    });
+
+  });
+
+  describe('#runScript', () => {
+
+    beforeEach(() => {
+      const beServiceObj = spyOn(component, 'beService').and.callThrough();
+      spyOn(beServiceObj, 'runScript');
+      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      fixture.detectChanges();
+    });
+
+    it('should be defined', () => {
+      expect(component.runScript).toBeDefined();
+    });
+
+    it('should call beService runScript method', () => {
+      component.runScript();
+      expect(component.beService.runScript).toHaveBeenCalledWith('editorValue', 'someRoom');
+    });
+
+  });
+
   describe('#onEditorChanges', () => {
 
     beforeEach(() => {
@@ -173,6 +260,50 @@ describe('RoomComponent', () => {
     it('should call beService updateFile with editor value & roomName', () => {
       component.onEditorChanges();
       expect(component.beService.updateFile).toHaveBeenCalledWith('editorValue', 'someRoom');
+    });
+
+  });
+
+  describe('#ngOnDestroy', () => {
+
+    beforeEach(() => {
+      const beServiceObj = spyOn(component, 'beService').and.callThrough();
+      spyOn(beServiceObj, 'leaveRoom');
+      spyOn(window, 'clearInterval');
+    });
+
+    it('should be defined', () => {
+      expect(component.ngOnDestroy).toBeDefined();
+    });
+
+    it('should call beService updateFile with editor value & roomName', () => {
+      component.ngOnDestroy();
+      expect(component.beService.leaveRoom).toHaveBeenCalledWith();
+    });
+
+    it('should call beService updateFile with editor value & roomName', () => {
+      component.ngOnDestroy();
+      expect(window.clearInterval).toHaveBeenCalledWith(component.saver);
+    });
+
+  });
+
+  describe('#saveFile', () => {
+
+    beforeEach(() => {
+      const beServiceObj = spyOn(component, 'beService').and.callThrough();
+      spyOn(beServiceObj, 'fileSave');
+      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      fixture.detectChanges();
+    });
+
+    it('should be defined', () => {
+      expect(component.saveFile).toBeDefined();
+    });
+
+    it('should call beService updateFile with editor value & roomName', () => {
+      component.saveFile();
+      expect(component.beService.fileSave).toHaveBeenCalledWith('editorValue', 'someRoom');
     });
 
   });
