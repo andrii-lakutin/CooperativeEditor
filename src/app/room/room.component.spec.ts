@@ -115,10 +115,10 @@ describe('RoomComponent', () => {
       expect(component.userRoom).toEqual('someRoom');
     });
 
-    it('should set text value when new data comes from file$ observable', () => {
-      component.ngOnInit();
-      expect(component.text).toEqual('someText');
-    });
+    // it('should set text value when new data comes from file$ observable', () => {
+    //   component.ngOnInit();
+    //   expect(component.text).toEqual('someText');
+    // });
 
     it('should set text value when new data comes from file$ observable', () => {
       component.ngOnInit();
