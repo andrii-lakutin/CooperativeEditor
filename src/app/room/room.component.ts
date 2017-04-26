@@ -66,6 +66,9 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       name: 'runAndSave',
       bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
       exec: () => {
+        if (this.editor.getEditor().getValue() === '') {
+          this.output.getEditor().setValue('');
+        }
         this.saveFile();
         this.runScript();
       },
