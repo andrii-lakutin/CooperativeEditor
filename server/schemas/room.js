@@ -7,7 +7,8 @@ let Room = mongoose.model('Room', new Schema({
 	id: ObjectId,
 	name: String,
 	users: [],
-	editorValue: String
+	editorValue: String,
+	chatMessages: []
 }));
 
 export default Room;

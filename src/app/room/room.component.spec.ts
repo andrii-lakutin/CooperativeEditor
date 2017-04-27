@@ -4,7 +4,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { RoomComponent } from './room.component';
 import { RouterService, BEService } from '../shared';
 
-import { Observable, BehaviorSubject } from 'rxjs/Rx';
+import { Observable, BehaviorSubject, Subject } from 'rxjs/Rx';
 
 describe('RoomComponent', () => {
   let component: RoomComponent;
@@ -24,10 +24,13 @@ describe('RoomComponent', () => {
       updateFile: () => {},
       leaveRoom: () => {},
       runScript: () => {},
+      sendMessage: () => {},
+      getChatMessages: () => {},
       user$: new BehaviorSubject({nick: '', room: ''}),
       file$: new BehaviorSubject(''),
       output$: new BehaviorSubject(''),
       outputError$: new BehaviorSubject(''),
+      chatMessages$: new BehaviorSubject({from: '', message: ''}),
       changeUserSubject: function (param) {
         this.user$.next(param);
       },
@@ -40,6 +43,9 @@ describe('RoomComponent', () => {
       changeOutputErrorSubject: function (param) {
         this.outputError$.next(param);
       },
+      changeChatMessagesSubject: function (param) {
+        this.chatMessages$.next(param);
+      }
     };
 
     TestBed.configureTestingModule({
@@ -63,6 +69,7 @@ describe('RoomComponent', () => {
           commands: {
             addCommand: (a) => { a.exec(); }
           },
+          setOption: () => {},
           getValue: () => 'editorValue',
           setValue: (newValue, params) => { return {newValue, params}; }
         };
@@ -72,6 +79,7 @@ describe('RoomComponent', () => {
       getEditor: () => {
         return {
           $blockScrolling: Infinity,
+          setOption: () => {},
           getValue: () => 'outputValue',
           setValue: (newValue, params) => { return {newValue, params}; }
         };
@@ -103,6 +111,7 @@ describe('RoomComponent', () => {
 
       beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
       beService.changeFileSubject('someText');
+      beService.changeChatMessagesSubject({from: 'user', message: 'hello'});
       jasmine.clock().install();
       fixture.detectChanges();
     });
@@ -143,31 +152,26 @@ describe('RoomComponent', () => {
       expect(component.output.getEditor().setValue('newError', -1)).toEqual({newValue: 'newError', params: -1});
     });
 
+    it('should push message to chatMessages array', () => {
+      component.ngOnInit();
+      expect(component.chatMessages).toEqual([{from: 'user', message: 'hello'}, {from: 'user', message: 'hello'}]);
+    });
+
     it('should set text value when new data comes from file$ observable', () => {
-      const fileSaveSpy = spyOn(component, 'saveFile');
+      spyOn(component, 'saveFile');
       component.ngOnInit();
       jasmine.clock().tick(5001);
       expect(component.saveFile).toHaveBeenCalledWith();
-      jasmine.clock().tick(5001);
-      expect(fileSaveSpy.calls.count()).toEqual(2);
-    });
-
-  });
-
-  describe('#ngAfterViewInit', () => {
-
-    it('should be defined', () => {
-      expect(component.ngAfterViewInit).toBeDefined();
     });
 
     it('should init custom commands', () => {
       spyOn(component, 'initCustomCommands');
-      component.ngAfterViewInit();
+      component.ngOnInit();
       expect(component.initCustomCommands).toHaveBeenCalledWith();
     });
 
     it('should set $blockScrolling to Infinity to block console pollution from library', () => {
-      component.ngAfterViewInit();
+      component.ngOnInit();
       expect(component.editor.getEditor().$blockScrolling).toEqual(Infinity);
       expect(component.output.getEditor().$blockScrolling).toEqual(Infinity);
     });
@@ -180,8 +184,13 @@ describe('RoomComponent', () => {
       expect(component.sendMessage).toBeDefined();
     });
 
-    it('should ...', () => {
-      component.sendMessage('someMsg');
+    it('should call beService sendMessage method with message, nick, room', () => {
+      const beServiceObj = spyOn(component, 'beService').and.callThrough();
+      spyOn(beServiceObj, 'sendMessage');
+      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      fixture.detectChanges();
+      component.sendMessage('hello');
+      expect(component.beService.sendMessage).toHaveBeenCalledWith('hello', 'someNick', 'someRoom');
     });
 
   });
@@ -239,7 +248,7 @@ describe('RoomComponent', () => {
 
     it('should call beService runScript method', () => {
       component.runScript();
-      expect(component.beService.runScript).toHaveBeenCalledWith('editorValue', 'someRoom');
+      expect(component.beService.runScript).toHaveBeenCalledWith('editorValue'.split('\n').join(''), 'someRoom');
     });
 
   });

@@ -10,10 +10,18 @@
       {{userNickname}}
     </div>
     
-    <div class="messages"></div>
+    <ul class="messages">
+      <li 
+        class="message"
+        [ngClass]="{'right': message.from !== userNickname}"
+        *ngFor="let message of chatMessages" >
+          <p class="from">{{message.from}}</p>
+          <p class="messageContent">{{message.message}}</p>
+      </li>
+    </ul>
     <input 
         #message
-        class="message" 
+        class="messageInput" 
         type="text"
         placeholder="Type message here..."
         (keyup.enter)="
