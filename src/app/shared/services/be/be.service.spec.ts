@@ -25,7 +25,7 @@ describe('BEService', () => {
 
     expect(beService.file$).toEqual(new BehaviorSubject(''));
     expect(beService.output$).toEqual(new BehaviorSubject(''));
-    expect(beService.outputError$).toEqual(new BehaviorSubject(''));
+    expect(beService.chatMessages$).toEqual(beService.chatMessagesSubject.asObservable());
   });
 
   describe('#connect', () => {
@@ -34,6 +34,8 @@ describe('BEService', () => {
       spyOn(beService, 'listenForNewcomers');
       spyOn(beService, 'listenForFileUpdates');
       spyOn(beService, 'listenForOutput');
+      spyOn(beService, 'listenForChatMessages');
+      spyOn(beService, 'listenForInitialChatMessages');
     });
 
     it('should be defined', () => {
@@ -46,6 +48,8 @@ describe('BEService', () => {
       expect(beService.listenForNewcomers).toHaveBeenCalledWith();
       expect(beService.listenForFileUpdates).toHaveBeenCalledWith();
       expect(beService.listenForOutput).toHaveBeenCalledWith();
+      expect(beService.listenForChatMessages).toHaveBeenCalledWith();
+      expect(beService.listenForInitialChatMessages).toHaveBeenCalledWith();
     });
 
   });
@@ -123,6 +127,55 @@ describe('BEService', () => {
       beService.listenForOutput();
       expect(beService.socket.on).toHaveBeenCalledWith('Script run finished', jasmine.any(Function));
       expect(beService.outputError$.next).toHaveBeenCalledWith('Server error');
+    });
+
+  });
+
+  describe('#listenForChatMessages', () => {
+
+    beforeEach(() => {
+      beService.connect();
+      const socket = spyOn(beService, 'socket').and.callThrough();
+      spyOn(socket, 'on').and.callFake((eventString, cb) => {
+        cb('user', 'hello');
+      });
+      spyOn(beService.chatMessagesSubject, 'next').and.callThrough();
+    });
+
+    it('should be defined', () => {
+      expect(beService.listenForChatMessages).toBeDefined();
+    });
+
+    it('should push new value to file$ observable', () => {
+      beService.listenForChatMessages();
+      expect(beService.socket.on).toHaveBeenCalledWith('New chat message', jasmine.any(Function));
+      expect(beService.chatMessagesSubject.next).toHaveBeenCalledWith({from: 'user', message: 'hello'});
+    });
+
+  });
+
+  describe('#listenForInitialChatMessages', () => {
+
+    let spy;
+
+    beforeEach(() => {
+      beService.connect();
+      const socket = spyOn(beService, 'socket').and.callThrough();
+      spyOn(socket, 'on').and.callFake((eventString, cb) => {
+        cb([{from: 'user', message: 'hello'}, {from: 'user', message: 'hello'}]);
+      });
+      spy = spyOn(beService.chatMessagesSubject, 'next').and.callThrough();
+    });
+
+    it('should be defined', () => {
+      expect(beService.listenForInitialChatMessages).toBeDefined();
+    });
+
+    it('should push new value to file$ observable', () => {
+      beService.listenForInitialChatMessages();
+      expect(beService.socket.on).toHaveBeenCalledWith('Initial chat messages', jasmine.any(Function));
+      expect(beService.chatMessagesSubject.next).toHaveBeenCalledWith({from: 'user', message: 'hello'});
+      expect(spy.calls.count()).toEqual(2);
     });
 
   });
@@ -270,6 +323,44 @@ describe('BEService', () => {
     it('should emit socket run script', () => {
       beService.runScript('console.log(1);', 'room');
       expect(beService.socket.emit).toHaveBeenCalledWith('Request for running script', 'console.log(1);', 'room');
+    });
+
+  });
+
+  describe('#sendMessage', () => {
+
+    beforeEach(() => {
+      beService.connect();
+      const socket = spyOn(beService, 'socket').and.callThrough();
+      spyOn(socket, 'emit');
+    });
+
+    it('should be defined', () => {
+      expect(beService.sendMessage).toBeDefined();
+    });
+
+    it('should emit socket send message', () => {
+      beService.sendMessage('hello', 'user', 'room');
+      expect(beService.socket.emit).toHaveBeenCalledWith('Send chat message', 'hello', 'user', 'room');
+    });
+
+  });
+
+  describe('#getChatMessages', () => {
+
+    beforeEach(() => {
+      beService.connect();
+      const socket = spyOn(beService, 'socket').and.callThrough();
+      spyOn(socket, 'emit');
+    });
+
+    it('should be defined', () => {
+      expect(beService.getChatMessages).toBeDefined();
+    });
+
+    it('should emit socket send message', () => {
+      beService.getChatMessages('room');
+      expect(beService.socket.emit).toHaveBeenCalledWith('Request for chat messages', 'room');
     });
 
   });
