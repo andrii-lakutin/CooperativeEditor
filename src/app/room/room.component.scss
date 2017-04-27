@@ -17,7 +17,6 @@
     }
 
     .chat {
-        // @include prototype();
         height: 70%;
         flex: 1 0 25%;
         display: flex;
@@ -38,6 +37,7 @@
 
             @include prototype();
             background: white;
+            overflow: auto;
         }
 
         .message {

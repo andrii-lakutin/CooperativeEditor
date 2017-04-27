@@ -10,7 +10,9 @@
       {{userNickname}}
     </div>
     
-    <div class="messages"></div>
+    <ul class="messages">
+      <li *ngFor="let message of chatMessages">{{ message.from + ':' + message.message}}</li>
+    </ul>
     <input 
         #message
         class="message" 

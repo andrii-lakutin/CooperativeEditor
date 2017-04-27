@@ -7,12 +7,13 @@ import { RouterService, BEService } from '../shared';
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.scss']
 })
-export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
+export class RoomComponent implements OnInit, OnDestroy {
   @ViewChild('editor') editor;
   @ViewChild('output') output;
   userNickname: string;
   userRoom: string;
   saver: any;
+  chatMessages: Array<any>;
 
   constructor(
     public routerService: RouterService,
@@ -20,6 +21,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {
     this.userNickname = '';
     this.userRoom = '';
+    this.chatMessages = [];
   }
 
   ngOnInit() {
@@ -43,14 +45,19 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       this.output.getEditor().setValue(outputError, -1);
     });
 
+    this.beService.chatMessages$.subscribe(message => {
+      if (message.from && message.message) {
+        this.chatMessages.push(message);
+      }
+    });
+
     this.saver = setInterval(() => {
       this.saveFile();
     }, 5000);
 
+    this.beService.getChatMessages(this.userRoom);
     this.beService.getEditorValue(this.userRoom);
-  }
 
-  ngAfterViewInit() {
     this.initCustomCommands();
     // Just preventing some console pollution from editor library
     this.editor.getEditor().$blockScrolling = Infinity;
@@ -58,7 +65,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   sendMessage(msg) {
-    console.log(msg);
+    this.beService.sendMessage(msg, this.userNickname, this.userRoom);
   }
 
   initCustomCommands() {
@@ -77,7 +84,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   runScript() {
-    this.beService.runScript(this.editor.getEditor().getValue(), this.userRoom);
+    this.beService.runScript(this.editor.getEditor().getValue().split('\n').join(''), this.userRoom);
   }
 
   onEditorChanges() {

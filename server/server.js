@@ -36,6 +36,14 @@ io.on('connection', (socket) => {
     onFileUpdate(info);
   });
 
+  socket.on('Send chat message', (message, from, room) => {
+    onChatMessage(message, from, room);
+  });
+
+  socket.on('Request for chat messages', (room) => {
+    onMessagesRequst(room);
+  });
+
   socket.on('User leave room', () => {
     leaveRoom(socket.id);
   });
@@ -52,8 +60,30 @@ http.listen(3000, () => {
 function runScript(script, room) {
   let exec = require('child_process').exec;
   let childProcess = exec(`babel-node -e "${script}"`, function(error, stdout, stderr){
+    console.log('OUT', stdout);
     io.to(room).emit('Script run finished', stdout, stderr);
     childProcess.kill();
+  });
+}
+
+function onChatMessage(message, from, room) {
+  Room.findOneAndUpdate(
+    {
+      name: room
+    },
+    { 
+        $push: { 
+          chatMessages: { 
+            from,
+            message
+          } 
+        }
+    })
+  .exec((err,data) => {
+    if (err) {
+      console.log('Mongo push message error');
+    }
+    io.to(room).emit('New chat message', from, message);
   });
 }
 
@@ -168,6 +198,18 @@ function getEditorValue(roomName) {
       } else {
         if (room) {
           io.to(roomName).emit('Someone update file', room.editorValue);
+        }
+      }
+  });
+}
+
+function onMessagesRequst(roomName) {
+  Room.findOne({name: roomName}).exec((err,room) => {
+      if (err) {
+        console.log('Mongo find error');
+      } else {
+        if (room) {
+          io.to(roomName).emit('Initial chat messages', room.chatMessages);
         }
       }
   });
