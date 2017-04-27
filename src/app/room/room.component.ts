@@ -62,6 +62,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     // Just preventing some console pollution from editor library
     this.editor.getEditor().$blockScrolling = Infinity;
     this.output.getEditor().$blockScrolling = Infinity;
+    // Disable vertical split line
+    this.editor.getEditor().setOption('showPrintMargin', false);
+    this.output.getEditor().setOption('showPrintMargin', false);
   }
 
   sendMessage(msg) {

@@ -69,6 +69,7 @@ describe('RoomComponent', () => {
           commands: {
             addCommand: (a) => { a.exec(); }
           },
+          setOption: () => {},
           getValue: () => 'editorValue',
           setValue: (newValue, params) => { return {newValue, params}; }
         };
@@ -78,6 +79,7 @@ describe('RoomComponent', () => {
       getEditor: () => {
         return {
           $blockScrolling: Infinity,
+          setOption: () => {},
           getValue: () => 'outputValue',
           setValue: (newValue, params) => { return {newValue, params}; }
         };
