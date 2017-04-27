@@ -38,9 +38,34 @@
             @include prototype();
             background: white;
             overflow: auto;
+            display: flex;
+            flex-wrap: wrap;
+            overflow-wrap: break-word;
         }
 
         .message {
+            flex: 1 0 100%;
+            display: flex;
+            
+            & .from {
+                background: #757575;
+                color: white;
+                border-radius: 99999px;
+                padding: 3px 5px;
+                margin: 0px 5px;
+            }
+            & .messageContent {
+                background: rgba(aquamarine, 0.5);
+                border-radius: 99999px;
+                padding: 3px 5px;
+            }
+        }
+
+        .right {
+            direction: rtl;
+        }
+
+        .messageInput {
             flex: 1 0 6%;
         }
     }
