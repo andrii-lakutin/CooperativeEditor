@@ -15,8 +15,12 @@
         class="message"
         [ngClass]="{'right': message.from !== userNickname}"
         *ngFor="let message of chatMessages" >
-          <p class="from">{{message.from}}</p>
-          <p class="messageContent">{{message.message}}</p>
+          <p class="messagePart">
+            {{ message.from === userNickname? message.from + ":" : message.message }}
+          </p>
+          <p class="messagePart">
+            {{message.from === userNickname? message.message : ":" + message.from }}
+          </p>
       </li>
     </ul>
     <input 
@@ -29,10 +33,14 @@
           message.value = '';
         "/>
   </div>
-  <div
-      class="outputHeader"
-      (click)="runScript()">
-      RUN
+  <div class="outputHeader">
+      <p class="outputLabel">Output :</p>
+      <div
+        (click)="runScript()"
+        class="runButton">
+        <i class="material-icons">rowing</i>
+        <p>Run</p>
+      </div>
   </div>
   <ace-editor
     #output
