@@ -59,8 +59,7 @@ http.listen(3000, () => {
 
 function runScript(script, room) {
   let exec = require('child_process').exec;
-  let childProcess = exec(`babel-node -e "${script}"`, function(error, stdout, stderr){
-    console.log('OUT', stdout);
+  let childProcess = exec(`babel-node --presets es2015 -e "${script}"`, function(error, stdout, stderr){
     io.to(room).emit('Script run finished', stdout, stderr);
     childProcess.kill();
   });
