@@ -17,12 +17,12 @@
         class="message"
         [ngClass]="{'right': message.from !== userNickname}"
         *ngFor="let message of chatMessages" >
-          <p [ngClass]="{'from': message.from === userNickname, 'messageContent': message.from !== userNickname}">
-            {{ message.from === userNickname? message.from + ":" : message.message }}
-          </p>
-          <p [ngClass]="{'messageContent': message.from === userNickname, 'from': message.from !== userNickname}">
-            {{message.from === userNickname? message.message : ":" + message.from }}
-          </p>
+          <div [ngClass]="{'from': message.from === userNickname, 'messageContent': message.from !== userNickname}">
+            {{ message.from === userNickname? message.from : message.message }}
+          </div>
+          <div [ngClass]="{'messageContent': message.from === userNickname, 'from': message.from !== userNickname}">
+            {{message.from === userNickname? message.message : message.from }}
+          </div>
       </li>
     </ul>
     <input 

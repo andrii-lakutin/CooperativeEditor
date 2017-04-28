@@ -36,46 +36,39 @@
         }
 
         .messages {
-            flex: 1 0 82%;
-            max-height: 82%;
+            flex: 1 0 84%;
+            max-height: 84%;
             @include prototype();
-            background: darkslateblue;
-            overflow: auto;
+            background: white;
+            overflow-y: scroll;
             display: flex;
-            padding: 1%;
             overflow-wrap: break-word;
-            flex-direction: column;
+            flex-wrap: wrap;
+            align-items: flex-start;
             .message {
-                flex: 1 0 5%;
+                flex: 1 0 100%;
                 display: flex;
-                max-height: 22px;
-                margin: 10px 0px;
-                color: white;
-                max-width: 200px;
-                flex-wrap: wrap;
-                &:first-child {
-                    margin-top: 10px;
-                }
-
+                flex-direction: column;
                 & .from {
                     margin: 5px;
+                    color: gray;
                 }
     
                 & .messageContent {
                     padding: 3px 3px;
-                    margin: 0px 5px;
-                    border-radius: 20px;
-                    background: crimson;
-                    padding: 15px 10px;
+                    background: rgba(102, 217, 239, 0.70);
+                    padding: 10px 10px;
                     word-break: break-all;
                     display: flex;
-                    justify-content: center;
                     align-items: center;
+                    order: 1;
                 }
-            }
 
-            .right {
-                align-self: flex-end;
+                &.right {
+                    .from {
+                        align-self: flex-end;
+                    }
+                }
             }
         }
 
