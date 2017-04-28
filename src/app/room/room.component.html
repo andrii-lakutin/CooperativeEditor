@@ -10,7 +10,9 @@
       {{userNickname}}
     </div>
     
-    <ul class="messages">
+    <ul 
+        #messagesContainer
+        class="messages">
       <li 
         class="message"
         [ngClass]="{'right': message.from !== userNickname}"

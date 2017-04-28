@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
 
 import { RouterService, BEService } from '../shared';
 
@@ -10,6 +10,7 @@ import { RouterService, BEService } from '../shared';
 export class RoomComponent implements OnInit, OnDestroy {
   @ViewChild('editor') editor;
   @ViewChild('output') output;
+  @ViewChild('messagesContainer') messagesContainer;
   userNickname: string;
   userRoom: string;
   saver: any;
@@ -48,6 +49,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.beService.chatMessages$.subscribe(message => {
       if (message.from && message.message) {
         this.chatMessages.push(message);
+        setTimeout(() => {
+          this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+        }, 0);
       }
     });
 
