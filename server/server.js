@@ -41,7 +41,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('Request for chat messages', (room) => {
-    onMessagesRequst(room);
+    onMessagesRequst(room, socket);
   });
 
   socket.on('User leave room', () => {
@@ -185,7 +185,7 @@ function onFileUpdate(info) {
       console.log('Mongo update error');
     } else {
       if (room) {
-        console.log(`Editor in ${room.name} saved.`);
+        // console.log(`Editor in ${room.name} saved.`);
       }
     }
   });
@@ -203,13 +203,13 @@ function getEditorValue(roomName) {
   });
 }
 
-function onMessagesRequst(roomName) {
+function onMessagesRequst(roomName, socket) {
   Room.findOne({name: roomName}).exec((err,room) => {
       if (err) {
         console.log('Mongo find error');
       } else {
         if (room) {
-          io.to(roomName).emit('Initial chat messages', room.chatMessages);
+          socket.emit('Initial chat messages', room.chatMessages);
         }
       }
   });
