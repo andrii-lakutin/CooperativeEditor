@@ -85,6 +85,11 @@ describe('RoomComponent', () => {
         };
       }
     };
+    component.messagesContainer = {
+      nativeElement: {
+        scrollHeight: 100
+      }
+    };
     routerService = fixture.debugElement.injector.get(RouterService);
     beService = fixture.debugElement.injector.get(BEService);
     fixture.detectChanges();
@@ -155,6 +160,12 @@ describe('RoomComponent', () => {
     it('should push message to chatMessages array', () => {
       component.ngOnInit();
       expect(component.chatMessages).toEqual([{from: 'user', message: 'hello'}, {from: 'user', message: 'hello'}]);
+    });
+
+    it('should scroll down when new messages comes', () => {
+      component.ngOnInit();
+      jasmine.clock().tick(0);
+      expect(component.messagesContainer.nativeElement.scrollTop).toEqual(100);
     });
 
     it('should set text value when new data comes from file$ observable', () => {
