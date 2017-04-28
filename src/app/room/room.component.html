@@ -15,10 +15,10 @@
         class="message"
         [ngClass]="{'right': message.from !== userNickname}"
         *ngFor="let message of chatMessages" >
-          <p class="messagePart">
+          <p [ngClass]="{'from': message.from === userNickname, 'messageContent': message.from !== userNickname}">
             {{ message.from === userNickname? message.from + ":" : message.message }}
           </p>
-          <p class="messagePart">
+          <p [ngClass]="{'messageContent': message.from === userNickname, 'from': message.from !== userNickname}">
             {{message.from === userNickname? message.message : ":" + message.from }}
           </p>
       </li>
