@@ -15,21 +15,21 @@ export class LoginPageComponent implements OnInit {
     public beService: BEService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
   }
 
-  joinRoom(info) {
+  joinRoom(info: RoomInfo): void {
     this.beService.logIn(info);
     this.beService.joinRoom(info);
   }
 
-  onSubmit(nick: string, room: string) {
-    if (!room || !nick) {
+  onSubmit(userNickname: string, roomName: string): void {
+    if (!roomName || !userNickname) {
       return;
     }
 
-    this.joinRoom({nick, room});  // TODO: Add some access rules.
-    this.routerService.navigateToRoom(room);
+    this.joinRoom({userNickname, roomName});  // TODO: Add some access rules.
+    this.routerService.navigateToRoom(roomName);
   }
 
 }
