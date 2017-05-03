@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "nodemon server/server.js --exec babel-node --presets es2015,stage-2",
+    "start": "nodemon server/server.js --exec babel-node --presets es2015,stage-2 $PORT",
     "build": "ng build",
     "test": "ng test --code-coverage",
     "lint": "ng lint",
