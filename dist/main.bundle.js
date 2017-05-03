@@ -213,7 +213,7 @@ var BEService = (function () {
         this.chatMessages$ = this.chatMessagesSubject.asObservable();
     }
     BEService.prototype.connect = function () {
-        this.socket = __WEBPACK_IMPORTED_MODULE_1_socket_io_client__(':3000');
+        this.socket = __WEBPACK_IMPORTED_MODULE_1_socket_io_client__("https://cooperative-editor.herokuapp.com/");
         this.listenForNewcomers();
         this.listenForFileUpdates();
         this.listenForOutput();
