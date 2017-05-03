@@ -29,7 +29,7 @@ export class BEService {
   }
 
   connect() {
-    this.socket = io(':3000');
+    this.socket = io(`:${process.env.PORT || 3000}`);
     this.listenForNewcomers();
     this.listenForFileUpdates();
     this.listenForOutput();
