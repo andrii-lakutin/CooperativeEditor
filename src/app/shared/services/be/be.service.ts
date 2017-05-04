@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as io from 'socket.io-client';
+import * as ioType from 'socket.io-client';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
@@ -7,10 +7,12 @@ import { Observable } from 'rxjs/Observable';
 
 import { RouterService } from '../router/router.service';
 
+declare const io: ioType;
+
 @Injectable()
 export class BEService {
 
-  private socket: io;
+  public socket: ioType;
   public user$: BehaviorSubject<User>;
   public file$: BehaviorSubject<string>;
   public output$: BehaviorSubject<string>;
@@ -18,7 +20,7 @@ export class BEService {
   public chatMessages$: Observable<Message>;
   public chatMessagesSubject = new Subject();
 
-  constructor(public routerService: RouterService,) {
+  constructor(public routerService: RouterService) {
     this.user$ = new BehaviorSubject({
       nickname: '',
       roomName: ''
