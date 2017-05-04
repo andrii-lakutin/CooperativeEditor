@@ -65,7 +65,7 @@ function runScript(script, room) {
   });
 }
 
-function onChatMessage(message, from, room) {
+function onChatMessage(content, from, room) {
   Room.findOneAndUpdate(
     {
       name: room
@@ -74,7 +74,7 @@ function onChatMessage(message, from, room) {
         $push: { 
           chatMessages: { 
             from,
-            message
+            content
           } 
         }
     })
@@ -82,12 +82,12 @@ function onChatMessage(message, from, room) {
     if (err) {
       console.log('Mongo push message error');
     }
-    io.to(room).emit('New chat message', from, message);
+    io.to(room).emit('New chat message', from, content);
   });
 }
 
 function joinRoom(info, socket) {
-  Room.find({name: info.room}).exec((err,data) => {
+  Room.find({name: info.roomName}).exec((err,data) => {
       if (err) {
         console.log('Mongo find error');
       } else {
@@ -103,25 +103,25 @@ function joinRoom(info, socket) {
 
 function createRoom(info, socket) {
   let newRoom = new Room({
-    name: info.room,
+    name: info.roomName,
     users: [{
-      nick: info.nick,
+      nick: info.nickname,
       socketId: socket.id
     }], 
     editorValue: ''
   });
 
-  newRoom.save((err, test) => {
+  newRoom.save((err, room) => {
     if (err) return console.error('Mongo save error', err);
-    console.log('New room created, name & id:', test.name, test._id);
+    console.log('New room created, name & id:', room.name, room._id);
     joinSocket(info, socket);
   });
 };
 
 function joinSocket(info, socket) {
-  socket.join(info.room);
-  socket.broadcast.to(info.room).emit('Someone has been joined to the room', info);
-  console.log(`Socket ${socket.id} joined as ${info.nick} to ${info.room}`);
+  socket.join(info.roomName);
+  socket.broadcast.to(info.roomName).emit('Someone has been joined to the room', info);
+  console.log(`Socket ${socket.id} joined as ${info.nickname} to ${info.roomName}`);
 };
 
 function leaveRoom(id, room) {
@@ -154,12 +154,12 @@ function leaveRoom(id, room) {
 function pushToRoom(info, socket) {
   Room.findOneAndUpdate(
     {
-      name: info.room
+      name: info.roomName
     },
     { 
         $push: { 
           users: { 
-            nick: info.nick,
+            nick: info.userNickname,
             socketId: socket.id
           } 
         }

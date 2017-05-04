@@ -5,22 +5,23 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 
+import { RouterService } from '../router/router.service';
+
 @Injectable()
 export class BEService {
 
-  socket: any;
-  user$: BehaviorSubject<any>;
-  file$: BehaviorSubject<any>;
-  output$: BehaviorSubject<any>;
-  outputError$: BehaviorSubject<any>;
-  chatMessages$: Observable<any>;
-
+  private socket: io;
+  public user$: BehaviorSubject<User>;
+  public file$: BehaviorSubject<string>;
+  public output$: BehaviorSubject<string>;
+  public outputError$: BehaviorSubject<string>;
+  public chatMessages$: Observable<Message>;
   public chatMessagesSubject = new Subject();
 
-  constructor() {
+  constructor(public routerService: RouterService,) {
     this.user$ = new BehaviorSubject({
-      nick: null,
-      room: null
+      nickname: '',
+      roomName: ''
     });
     this.file$ = new BehaviorSubject('');
     this.output$ = new BehaviorSubject('');
@@ -28,8 +29,8 @@ export class BEService {
     this.chatMessages$ = this.chatMessagesSubject.asObservable();
   }
 
-  connect() {
-    this.socket = io(`https://cooperative-editor.herokuapp.com/`);
+  public connect(): void {
+    this.socket = io(`:3000`);
     this.listenForNewcomers();
     this.listenForFileUpdates();
     this.listenForOutput();
@@ -37,76 +38,78 @@ export class BEService {
     this.listenForInitialChatMessages();
   }
 
-  listenForNewcomers () {
-    this.socket.on('Someone has been joined to the room', (info) => {
+  private listenForNewcomers(): void {
+    this.socket.on('Someone has been joined to the room', (user: User) => {
       // TODO: Handle another newcomers
     });
   }
 
-  listenForFileUpdates() {
-    this.socket.on('Someone update file', (file) => {
+  private listenForFileUpdates(): void {
+    this.socket.on('Someone update file', (file: string) => {
       this.file$.next(file);
     });
   }
 
-  listenForOutput() {
-    this.socket.on('Script run finished', (output, error) => {
+  private listenForOutput(): void {
+    this.socket.on('Script run finished', (output: string, error: string) => {
       error ? this.outputError$.next(error) : this.output$.next(output);
     });
   }
 
-  listenForChatMessages() {
-    this.socket.on('New chat message', (from, message) => {
-      this.chatMessagesSubject.next({from, message});
+  private listenForChatMessages(): void {
+    this.socket.on('New chat message', (from: string, message: string) => {
+      this.chatMessagesSubject.next({from, content: message});
     });
   }
 
-  listenForInitialChatMessages() {
-    this.socket.on('Initial chat messages', (messages) => {
-      messages.forEach(message => {
+  private listenForInitialChatMessages(): void {
+    this.socket.on('Initial chat messages', (messages: Array<Message>) => {
+      messages.forEach((message: Message) => {
         this.chatMessagesSubject.next(message);
       });
     });
   }
 
-  updateFile(file, room) {
+  public updateFile(file: string, room: string): void {
     this.socket.emit('File update', {file, room});
   }
 
-  joinRoom(info) {
-    this.socket.emit('Request for joining room', info);
-    this.logIn(info);
+  public joinRoom(nickname: string, roomName: string): void {
+    this.socket.emit('Request for joining room', {nickname, roomName});
+    this.routerService.navigateToRoom(roomName);
   }
 
-  logIn(user) {
-    this.user$.next(user);
+  public logIn(nickname: string, roomName: string): void {
+    this.user$.next({nickname, roomName});
+    this.joinRoom(nickname, roomName);
   }
 
-  isLogin() {
-    return this.user$.getValue().nick;
-  }
-
-  leaveRoom() {
+  public logOut(): void {
     this.socket.emit('User leave room');
+    this.user$.next({nickname: '', roomName: ''});
   }
 
-  fileSave (file, room) {
+  public isLogin(): string {
+    return this.user$.getValue().nickname;
+  }
+
+  public fileSave (file: string, room: string): void {
     this.socket.emit('File save', {file, room});
   }
 
-  getEditorValue(room) {
+  public getEditorValue(room: string): void {
     this.socket.emit('Request for editor value', room);
   }
 
-  runScript(script, room) {
+  public runScript(script: string, room: string): void {
     this.socket.emit('Request for running script', script, room);
   }
 
-  sendMessage (message, from, room) {
+  public sendMessage (message: string, from: string, room: string): void {
     this.socket.emit('Send chat message', message, from, room);
   }
 
-  getChatMessages(room) {
+  public getChatMessages(room: string): void {
     this.socket.emit('Request for chat messages', room);
   }
 

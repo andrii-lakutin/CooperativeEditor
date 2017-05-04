@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 
-import { RouterService } from '../../shared';
 import { BEService } from '../../shared';
 
 @Component({
@@ -10,26 +9,17 @@ import { BEService } from '../../shared';
 })
 export class LoginPageComponent implements OnInit {
 
-  constructor(
-    public routerService: RouterService,
-    public beService: BEService
-  ) {}
+  constructor(public beService: BEService) {}
 
   ngOnInit(): void {
   }
 
-  joinRoom(info: RoomInfo): void {
-    this.beService.logIn(info);
-    this.beService.joinRoom(info);
-  }
-
-  onSubmit(userNickname: string, roomName: string): void {
-    if (!roomName || !userNickname) {
+  public onSubmit(nickname: string, roomName: string): void {
+    if (!roomName || !nickname) {
       return;
     }
 
-    this.joinRoom({userNickname, roomName});  // TODO: Add some access rules.
-    this.routerService.navigateToRoom(roomName);
+    this.beService.logIn(nickname, roomName);  // TODO: Add some access rules.
   }
 
 }

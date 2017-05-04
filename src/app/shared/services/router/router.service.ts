@@ -9,11 +9,11 @@ export class RouterService {
     public activatedRoute: ActivatedRoute
   ) {}
 
-  navigateToRoom (room) {
+  public navigateToRoom (room: string) {
      this.router.navigate(['/rooms', room]);
   }
 
-  navigateToLogin() {
+  public navigateToLogin() {
     this.router.navigate(['/']);
   }
 }
