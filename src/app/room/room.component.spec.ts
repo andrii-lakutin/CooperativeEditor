@@ -22,15 +22,15 @@ describe('RoomComponent', () => {
       fileSave: () => {},
       getEditorValue: () => {},
       updateFile: () => {},
-      leaveRoom: () => {},
+      logOut: () => {},
       runScript: () => {},
       sendMessage: () => {},
       getChatMessages: () => {},
-      user$: new BehaviorSubject({nick: '', room: ''}),
+      user$: new BehaviorSubject({nickname: '', roomName: ''}),
       file$: new BehaviorSubject(''),
       output$: new BehaviorSubject(''),
       outputError$: new BehaviorSubject(''),
-      chatMessages$: new BehaviorSubject({from: '', message: ''}),
+      chatMessages$: new BehaviorSubject({from: '', content: ''}),
       changeUserSubject: function (param) {
         this.user$.next(param);
       },
@@ -62,28 +62,24 @@ describe('RoomComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(RoomComponent);
     component = fixture.componentInstance;
-    component.editor = {
-      getEditor: () => {
-        return {
-          $blockScrolling: Infinity,
-          commands: {
-            addCommand: (a) => { a.exec(); }
-          },
-          setOption: () => {},
-          getValue: () => 'editorValue',
-          setValue: (newValue, params) => { return {newValue, params}; }
-        };
-      }
+    component.editor.getEditor = () => {
+      return {
+        $blockScrolling: Infinity,
+        commands: {
+          addCommand: (a) => { a.exec(); }
+        },
+        setOption: () => {},
+        getValue: () => 'editorValue',
+        setValue: (newValue, params) => { return {newValue, params}; }
+      };
     };
-    component.output = {
-      getEditor: () => {
-        return {
-          $blockScrolling: Infinity,
-          setOption: () => {},
-          getValue: () => 'outputValue',
-          setValue: (newValue, params) => { return {newValue, params}; }
-        };
-      }
+    component.output.getEditor = () => {
+      return {
+        $blockScrolling: Infinity,
+        setOption: () => {},
+        getValue: () => 'outputValue',
+        setValue: (newValue, params) => { return {newValue, params}; }
+      };
     };
     component.messagesContainer = {
       nativeElement: {
@@ -114,9 +110,9 @@ describe('RoomComponent', () => {
       spyOn(routerServiceObj, 'navigateToLogin');
       spyOn(beServiceObj, 'fileSave');
 
-      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      beService.changeUserSubject({nickname: 'someNick', roomName: 'someRoom'});
       beService.changeFileSubject('someText');
-      beService.changeChatMessagesSubject({from: 'user', message: 'hello'});
+      beService.changeChatMessagesSubject({from: 'user', content: 'hello'});
       jasmine.clock().install();
       fixture.detectChanges();
     });
@@ -130,7 +126,7 @@ describe('RoomComponent', () => {
     });
 
     it('should navigate to login page if no user', () => {
-      beService.changeUserSubject({nick: '', room: 'someRoom'});
+      beService.changeUserSubject({nickname: '', roomName: 'someRoom'});
       fixture.detectChanges();
       component.ngOnInit();
       expect(component.routerService.navigateToLogin).toHaveBeenCalledWith();
@@ -159,7 +155,7 @@ describe('RoomComponent', () => {
 
     it('should push message to chatMessages array', () => {
       component.ngOnInit();
-      expect(component.chatMessages).toEqual([{from: 'user', message: 'hello'}, {from: 'user', message: 'hello'}]);
+      expect(component.chatMessages).toEqual([{from: 'user', content: 'hello'}, {from: 'user', content: 'hello'}]);
     });
 
     it('should scroll down when new messages comes', () => {
@@ -176,9 +172,9 @@ describe('RoomComponent', () => {
     });
 
     it('should init custom commands', () => {
-      spyOn(component, 'initCustomCommands');
+      const initCustomCommands = spyOn(component, 'initCustomCommands').and.callThrough();
       component.ngOnInit();
-      expect(component.initCustomCommands).toHaveBeenCalledWith();
+      expect(initCustomCommands).toHaveBeenCalledWith();
     });
 
     it('should set $blockScrolling to Infinity to block console pollution from library', () => {
@@ -198,7 +194,7 @@ describe('RoomComponent', () => {
     it('should call beService sendMessage method with message, nick, room', () => {
       const beServiceObj = spyOn(component, 'beService').and.callThrough();
       spyOn(beServiceObj, 'sendMessage');
-      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      beService.changeUserSubject({nickname: 'someNick', roomName: 'someRoom'});
       fixture.detectChanges();
       component.sendMessage('hello');
       expect(component.beService.sendMessage).toHaveBeenCalledWith('hello', 'someNick', 'someRoom');
@@ -208,36 +204,39 @@ describe('RoomComponent', () => {
 
   describe('#initCustomCommands', () => {
 
+    let initCustomCommands;
+
     beforeEach(() => {
       spyOn(component, 'saveFile');
       spyOn(component, 'runScript');
+      initCustomCommands = spyOn(component, 'initCustomCommands').and.callThrough();
     });
 
     it('should be defined', () => {
-      expect(component.initCustomCommands).toBeDefined();
+      expect(initCustomCommands).toBeDefined();
     });
 
     it('should set output value to "" if no editor value', () => {
-      component.editor = {
-        getEditor: () => {
-          return {
-            $blockScrolling: Infinity,
-            commands: {
-              addCommand: (a) => { a.exec(); }
-            },
-            getValue: () => '',
-            setValue: (newValue, params) => { return {newValue, params}; }
-          };
-        }
+      component.editor.getEditor = () => {
+        return {
+          $blockScrolling: Infinity,
+          commands: {
+            addCommand: (a) => { a.exec(); }
+          },
+          setOption: () => {},
+          getValue: () => '',
+          setValue: (newValue, params) => { return {newValue, params}; }
+        };
       };
-      component.initCustomCommands();
       expect(component.output.getEditor().setValue('')).toEqual({newValue: '', params: undefined});
+      fixture.detectChanges();
+      component.ngOnInit();
       expect(component.saveFile).toHaveBeenCalledWith();
       expect(component.runScript).toHaveBeenCalledWith();
     });
 
     it('should add ctrl+s combination', () => {
-      component.initCustomCommands();
+      component.ngOnInit();
       expect(component.saveFile).toHaveBeenCalledWith();
       expect(component.runScript).toHaveBeenCalledWith();
     });
@@ -249,7 +248,7 @@ describe('RoomComponent', () => {
     beforeEach(() => {
       const beServiceObj = spyOn(component, 'beService').and.callThrough();
       spyOn(beServiceObj, 'runScript');
-      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      beService.changeUserSubject({nickname: 'someNick', roomName: 'someRoom'});
       fixture.detectChanges();
     });
 
@@ -269,7 +268,7 @@ describe('RoomComponent', () => {
     beforeEach(() => {
       const beServiceObj = spyOn(component, 'beService').and.callThrough();
       spyOn(beServiceObj, 'updateFile');
-      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      beService.changeUserSubject({nickname: 'someNick', roomName: 'someRoom'});
       fixture.detectChanges();
     });
 
@@ -288,7 +287,7 @@ describe('RoomComponent', () => {
 
     beforeEach(() => {
       const beServiceObj = spyOn(component, 'beService').and.callThrough();
-      spyOn(beServiceObj, 'leaveRoom');
+      spyOn(beServiceObj, 'logOut');
       spyOn(window, 'clearInterval');
     });
 
@@ -298,7 +297,7 @@ describe('RoomComponent', () => {
 
     it('should call beService updateFile with editor value & roomName', () => {
       component.ngOnDestroy();
-      expect(component.beService.leaveRoom).toHaveBeenCalledWith();
+      expect(component.beService.logOut).toHaveBeenCalledWith();
     });
 
     it('should call beService updateFile with editor value & roomName', () => {
@@ -313,7 +312,7 @@ describe('RoomComponent', () => {
     beforeEach(() => {
       const beServiceObj = spyOn(component, 'beService').and.callThrough();
       spyOn(beServiceObj, 'fileSave');
-      beService.changeUserSubject({nick: 'someNick', room: 'someRoom'});
+      beService.changeUserSubject({nickname: 'someNick', roomName: 'someRoom'});
       fixture.detectChanges();
     });
 
