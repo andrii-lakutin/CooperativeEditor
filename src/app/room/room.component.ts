@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
-
+import { AceEditorComponent } from 'ng2-ace-editor';
 import { RouterService, BEService } from '../shared';
 
 @Component({
@@ -8,13 +8,13 @@ import { RouterService, BEService } from '../shared';
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit, OnDestroy {
-  @ViewChild('editor') editor;
-  @ViewChild('output') output;
-  @ViewChild('messagesContainer') messagesContainer;
+  @ViewChild('editor') editor: AceEditorComponent;
+  @ViewChild('output') output: AceEditorComponent;
+  @ViewChild('messagesContainer') messagesContainer: ElementRef;
   userNickname: string;
   userRoom: string;
   saver: any;
-  chatMessages: Array<any>;
+  chatMessages: Array<Message>;
 
   constructor(
     public routerService: RouterService,
@@ -25,29 +25,29 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatMessages = [];
   }
 
-  ngOnInit() {
-    this.beService.user$.subscribe(data => {
-      if (!data.nick) {
+  ngOnInit(): void {
+    this.beService.user$.subscribe((user: User) => {
+      if (!user.nickname) {
         this.routerService.navigateToLogin();
       }
-      this.userNickname = data.nick;
-      this.userRoom = data.room;
+      this.userNickname = user.nickname;
+      this.userRoom = user.roomName;
     });
 
-    this.beService.file$.subscribe(file => {
+    this.beService.file$.subscribe((file: string) => {
       this.editor.getEditor().setValue(file, 1);
     });
 
-    this.beService.output$.subscribe(output => {
+    this.beService.output$.subscribe((output: string) => {
       this.output.getEditor().setValue(output, 1);
     });
 
-    this.beService.outputError$.subscribe(outputError => {
+    this.beService.outputError$.subscribe((outputError: string) => {
       this.output.getEditor().setValue(outputError, -1);
     });
 
-    this.beService.chatMessages$.subscribe(message => {
-      if (message.from && message.message) {
+    this.beService.chatMessages$.subscribe((message: Message) => {
+      if (message.from && message.content) {
         this.chatMessages.push(message);
         setTimeout(() => {
           this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
@@ -71,11 +71,12 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.output.getEditor().setOption('showPrintMargin', false);
   }
 
-  sendMessage(msg) {
-    this.beService.sendMessage(msg, this.userNickname, this.userRoom);
+  ngOnDestroy(): void {
+    this.beService.logOut();
+    clearInterval(this.saver);
   }
 
-  initCustomCommands() {
+  private initCustomCommands(): void {
     this.editor.getEditor().commands.addCommand({
       name: 'runAndSave',
       bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
@@ -90,20 +91,19 @@ export class RoomComponent implements OnInit, OnDestroy {
     });
   }
 
-  runScript() {
+  public sendMessage(msg: string): void {
+    this.beService.sendMessage(msg, this.userNickname, this.userRoom);
+  }
+
+  public runScript(): void {
     this.beService.runScript(this.editor.getEditor().getValue().split('\n').join(''), this.userRoom);
   }
 
-  onEditorChanges() {
+  public onEditorChanges(): void {
     this.beService.updateFile(this.editor.getEditor().getValue(), this.userRoom);
   }
 
-  ngOnDestroy() {
-    this.beService.leaveRoom();
-    clearInterval(this.saver);
-  }
-
-  saveFile() {
+  public saveFile(): void {
     this.beService.fileSave(this.editor.getEditor().getValue(), this.userRoom);
     console.log('File saved');
   }

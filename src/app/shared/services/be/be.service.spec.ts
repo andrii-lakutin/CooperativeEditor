@@ -1,16 +1,54 @@
 import { TestBed, inject } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { BEService } from './be.service';
+import { RouterService } from '../router/router.service';
+
+import * as io from 'socket.io-client';
 
 describe('BEService', () => {
 
   let beService: BEService;
+  let routerServiceMock, routerService;
+
+  beforeAll(() => {
+    (window as any).io = (url) => {
+      return {
+        on: (string, cb) => {
+          switch (string) {
+            case 'Someone has been joined to the room':
+              cb('Some user');
+              break;
+            case 'Someone update file':
+              cb('File content');
+              break;
+            case 'Script run finished':
+              cb('Output content', '');
+              cb('', 'Error content');
+              break;
+            case 'New chat message':
+              cb('From someone', 'Message content');
+              break;
+            case 'Initial chat messages':
+              cb([{from: 'From someone', content: 'Message 1 content'}, {from: 'From another', content: 'Message 2 content'}]);
+              break;
+            default:
+              return;
+          }
+        },
+        emit: () => {}
+      };
+    };
+  });
 
   beforeEach(() => {
+    routerServiceMock = {
+      navigateToRoom: () => {}
+    };
     TestBed.configureTestingModule({
-      providers: [BEService]
+      providers: [BEService, {provide: RouterService, useValue: routerServiceMock }]
     });
     beService = TestBed.get(BEService);
+    routerService = TestBed.get(RouterService);
   });
 
   it('should be defined', () => {
@@ -19,8 +57,8 @@ describe('BEService', () => {
 
   it('~initialization', () => {
     expect(beService.user$).toEqual(new BehaviorSubject({
-      nick: null,
-      room: null
+      nickname: '',
+      roomName: ''
     }));
 
     expect(beService.file$).toEqual(new BehaviorSubject(''));
@@ -30,45 +68,45 @@ describe('BEService', () => {
 
   describe('#connect', () => {
 
+    let listenForNewcomers,
+        listenForFileUpdates,
+        listenForOutput,
+        listenForChatMessages,
+        listenForInitialChatMessages;
+
     beforeEach(() => {
-      spyOn(beService, 'listenForNewcomers');
-      spyOn(beService, 'listenForFileUpdates');
-      spyOn(beService, 'listenForOutput');
-      spyOn(beService, 'listenForChatMessages');
-      spyOn(beService, 'listenForInitialChatMessages');
+      listenForNewcomers = spyOn(beService, 'listenForNewcomers').and.callThrough();
+      listenForFileUpdates = spyOn(beService, 'listenForFileUpdates').and.callThrough();
+      listenForOutput = spyOn(beService, 'listenForOutput').and.callThrough();
+      listenForChatMessages = spyOn(beService, 'listenForChatMessages').and.callThrough();
+      listenForInitialChatMessages = spyOn(beService, 'listenForInitialChatMessages').and.callThrough();
     });
 
     it('should be defined', () => {
       expect(beService.connect).toBeDefined();
     });
 
-    it('should create socket connection', () => {
+    it('should create socket connection & init listeners', () => {
       beService.connect();
       expect(beService.socket).toBeTruthy();
-      expect(beService.listenForNewcomers).toHaveBeenCalledWith();
-      expect(beService.listenForFileUpdates).toHaveBeenCalledWith();
-      expect(beService.listenForOutput).toHaveBeenCalledWith();
-      expect(beService.listenForChatMessages).toHaveBeenCalledWith();
-      expect(beService.listenForInitialChatMessages).toHaveBeenCalledWith();
+      expect(listenForNewcomers).toHaveBeenCalledWith();
+      expect(listenForFileUpdates).toHaveBeenCalledWith();
+      expect(listenForOutput).toHaveBeenCalledWith();
+      expect(listenForChatMessages).toHaveBeenCalledWith();
+      expect(listenForInitialChatMessages).toHaveBeenCalledWith();
     });
 
   });
 
   describe('#listenForNewcomers', () => {
 
-    beforeEach(() => {
-      beService.connect();
-      const socket = spyOn(beService, 'socket').and.callThrough();
-      spyOn(socket, 'on');
-    });
-
     it('should be defined', () => {
-      expect(beService.listenForNewcomers).toBeDefined();
+      const listenForNewcomers = spyOn(beService, 'listenForNewcomers').and.callThrough();
+      expect(listenForNewcomers).toBeDefined();
     });
 
     it('should ...', () => {
-      beService.listenForNewcomers();
-      expect(beService.socket.on).toHaveBeenCalledWith('Someone has been joined to the room', jasmine.any(Function));
+      beService.connect();
     });
 
   });
@@ -76,80 +114,61 @@ describe('BEService', () => {
   describe('#listenForFileUpdates', () => {
 
     beforeEach(() => {
-      beService.connect();
-      const socket = spyOn(beService, 'socket').and.callThrough();
-      spyOn(socket, 'on').and.callFake((eventString, cb) => {
-        cb('Server response');
-      });
       spyOn(beService.file$, 'next').and.callThrough();
     });
 
     it('should be defined', () => {
-      expect(beService.listenForFileUpdates).toBeDefined();
+      const listenForFileUpdates = spyOn(beService, 'listenForFileUpdates').and.callThrough();
+      expect(listenForFileUpdates).toBeDefined();
     });
 
     it('should push new value to file$ observable', () => {
-      beService.listenForFileUpdates();
-      expect(beService.socket.on).toHaveBeenCalledWith('Someone update file', jasmine.any(Function));
-      expect(beService.file$.next).toHaveBeenCalledWith('Server response');
+      beService.connect();
+      expect(beService.file$.next).toHaveBeenCalledWith('File content');
     });
 
   });
 
   describe('#listenForOutput', () => {
 
-    let socket;
-
     beforeEach(() => {
-      beService.connect();
-      socket = spyOn(beService, 'socket').and.callThrough();
       spyOn(beService.outputError$, 'next').and.callThrough();
       spyOn(beService.output$, 'next').and.callThrough();
     });
 
     it('should be defined', () => {
-      expect(beService.listenForOutput).toBeDefined();
+      const listenForOutput = spyOn(beService, 'listenForOutput').and.callThrough();
+      expect(listenForOutput).toBeDefined();
     });
 
     it('should push new value to outbut$ observable', () => {
-      spyOn(socket, 'on').and.callFake((eventString, cb) => {
-        cb('Server output', '');
-      });
-      beService.listenForOutput();
-      expect(beService.socket.on).toHaveBeenCalledWith('Script run finished', jasmine.any(Function));
-      expect(beService.output$.next).toHaveBeenCalledWith('Server output');
+      beService.connect();
+      expect(beService.output$.next).toHaveBeenCalledWith('Output content');
     });
 
     it('should push new value to outbutError$ observable', () => {
-      spyOn(socket, 'on').and.callFake((eventString, cb) => {
-        cb('', 'Server error');
-      });
-      beService.listenForOutput();
-      expect(beService.socket.on).toHaveBeenCalledWith('Script run finished', jasmine.any(Function));
-      expect(beService.outputError$.next).toHaveBeenCalledWith('Server error');
+      beService.connect();
+      expect(beService.outputError$.next).toHaveBeenCalledWith('Error content');
     });
 
   });
 
   describe('#listenForChatMessages', () => {
 
+    let spy;
+
     beforeEach(() => {
-      beService.connect();
-      const socket = spyOn(beService, 'socket').and.callThrough();
-      spyOn(socket, 'on').and.callFake((eventString, cb) => {
-        cb('user', 'hello');
-      });
-      spyOn(beService.chatMessagesSubject, 'next').and.callThrough();
+      spy = spyOn(beService.chatMessagesSubject, 'next').and.callThrough();
     });
 
     it('should be defined', () => {
-      expect(beService.listenForChatMessages).toBeDefined();
+      const listenForChatMessages = spyOn(beService, 'listenForChatMessages').and.callThrough();
+      expect(listenForChatMessages).toBeDefined();
     });
 
     it('should push new value to file$ observable', () => {
-      beService.listenForChatMessages();
-      expect(beService.socket.on).toHaveBeenCalledWith('New chat message', jasmine.any(Function));
-      expect(beService.chatMessagesSubject.next).toHaveBeenCalledWith({from: 'user', message: 'hello'});
+      beService.connect();
+      expect(spy.calls.argsFor(0)).toEqual([{from: 'From someone', content: 'Message content'}]);
     });
 
   });
@@ -159,23 +178,20 @@ describe('BEService', () => {
     let spy;
 
     beforeEach(() => {
-      beService.connect();
-      const socket = spyOn(beService, 'socket').and.callThrough();
-      spyOn(socket, 'on').and.callFake((eventString, cb) => {
-        cb([{from: 'user', message: 'hello'}, {from: 'user', message: 'hello'}]);
-      });
       spy = spyOn(beService.chatMessagesSubject, 'next').and.callThrough();
     });
 
     it('should be defined', () => {
-      expect(beService.listenForInitialChatMessages).toBeDefined();
+      const listenForInitialChatMessages = spyOn(beService, 'listenForInitialChatMessages').and.callThrough();
+      expect(listenForInitialChatMessages).toBeDefined();
     });
 
     it('should push new value to file$ observable', () => {
-      beService.listenForInitialChatMessages();
-      expect(beService.socket.on).toHaveBeenCalledWith('Initial chat messages', jasmine.any(Function));
-      expect(beService.chatMessagesSubject.next).toHaveBeenCalledWith({from: 'user', message: 'hello'});
-      expect(spy.calls.count()).toEqual(2);
+      beService.connect();
+      expect(spy.calls.argsFor(0)).toEqual([{from: 'From someone', content: 'Message content'}]);
+      expect(spy.calls.argsFor(1)).toEqual([{from: 'From someone', content: 'Message 1 content'}]);
+      expect(spy.calls.argsFor(2)).toEqual([{from: 'From another', content: 'Message 2 content'}]);
+      expect(spy.calls.count()).toEqual(3);
     });
 
   });
@@ -205,7 +221,7 @@ describe('BEService', () => {
       beService.connect();
       const socket = spyOn(beService, 'socket').and.callThrough();
       spyOn(socket, 'emit');
-      spyOn(beService, 'logIn');
+      spyOn(routerService, 'navigateToRoom');
     });
 
     it('should be defined', () => {
@@ -213,9 +229,9 @@ describe('BEService', () => {
     });
 
     it('should emit socket join room & call logIn', () => {
-      beService.joinRoom({nick: 'nick', room: 'room'});
-      expect(beService.socket.emit).toHaveBeenCalledWith('Request for joining room', {nick: 'nick', room: 'room'});
-      expect(beService.logIn).toHaveBeenCalledWith({nick: 'nick', room: 'room'});
+      beService.joinRoom('nick', 'room');
+      expect(beService.socket.emit).toHaveBeenCalledWith('Request for joining room', {nickname: 'nick', roomName: 'room'});
+      expect(routerService.navigateToRoom).toHaveBeenCalledWith('room');
     });
 
   });
@@ -224,6 +240,7 @@ describe('BEService', () => {
 
     beforeEach(() => {
       spyOn(beService.user$, 'next');
+      spyOn(beService, 'joinRoom');
     });
 
     it('should be defined', () => {
@@ -231,8 +248,9 @@ describe('BEService', () => {
     });
 
     it('should push next value to user$ observable', () => {
-      beService.logIn({nick: 'nick', room: 'room'});
-      expect(beService.user$.next).toHaveBeenCalledWith({nick: 'nick', room: 'room'});
+      beService.logIn('nick', 'room');
+      expect(beService.user$.next).toHaveBeenCalledWith({nickname: 'nick', roomName: 'room'});
+      expect(beService.joinRoom).toHaveBeenCalledWith('nick', 'room');
     });
 
   });
@@ -244,28 +262,30 @@ describe('BEService', () => {
     });
 
     it('should return string with nickname', () => {
-      beService.user$.next({nick: 'nick', room: '1'});
+      beService.user$.next({nickname: 'nick', roomName: '1'});
       beService.isLogin();
       expect(beService.isLogin()).toEqual('nick');
     });
 
   });
 
-  describe('#leaveRoom', () => {
+  describe('#logOut', () => {
 
     beforeEach(() => {
       beService.connect();
       const socket = spyOn(beService, 'socket').and.callThrough();
       spyOn(socket, 'emit');
+      spyOn(beService.user$, 'next');
     });
 
     it('should be defined', () => {
-      expect(beService.leaveRoom).toBeDefined();
+      expect(beService.logOut).toBeDefined();
     });
 
     it('should emit socket leave room', () => {
-      beService.leaveRoom();
+      beService.logOut();
       expect(beService.socket.emit).toHaveBeenCalledWith('User leave room');
+      expect(beService.user$.next).toHaveBeenCalledWith({nickname: '', roomName: ''});
     });
 
   });
