@@ -178,7 +178,7 @@ var BEService = (function () {
         this.chatMessages$ = this.chatMessagesSubject.asObservable();
     }
     BEService.prototype.connect = function () {
-        this.socket = io(":3000");
+        this.socket = io("" + (location.origin === 'http://localhost:4200' ? ':3000' : 'https://cooperative-editor.herokuapp.com'));
         this.listenForNewcomers();
         this.listenForFileUpdates();
         this.listenForOutput();
